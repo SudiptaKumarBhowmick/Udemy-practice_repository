@@ -1,39 +1,87 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Collections.Generic;
+using System.Linq;
+using API.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [ApiController]
-    [Route(template: "[Controller]")]
-    public class DepartmentController : Controller
+
+    public class DepartmentController : MainApiController
     {
         [HttpGet]
         public IActionResult GetAll()
         {
-            return Ok("Get ALl Student");
+            return Ok(DepartmentStatic.GetAllDepartment());
         }
 
         [HttpGet(template: "{code}")]
         public IActionResult GetA(string code)
         {
-            return Ok("Get this " + code + " department data.");
+            return Ok(DepartmentStatic.GetADepartment(code));
         }
 
         [HttpPost]
-        public IActionResult Insert()
+        public IActionResult Insert(Department department)
         {
-            return Ok("Insert new department.");
+            return Ok(DepartmentStatic.InsertDepartment(department));
         }
 
         [HttpPut(template: "{code}")]
-        public IActionResult Update(string code)
+        public IActionResult Update(string code, Department department)
         {
-            return Ok("Update this " + code + " department data.");
+            return Ok(DepartmentStatic.Update_Department(code,department));
         }
 
         [HttpDelete(template: "{code}")]
         public IActionResult Delete(string code)
         {
-            return Ok("Delete this " + code + "department data.");
+            return Ok(DepartmentStatic.DeleteDepartment(code));
+        }
+    }
+
+    public static class DepartmentStatic
+    {
+        private static List<Department> AllDepartment { get; set; } = new List<Department>();
+
+        public static Department InsertDepartment(Department department)
+        {
+            AllDepartment.Add(department);
+            return department;
+        }
+
+        public static List<Department> GetAllDepartment()
+        {
+            return AllDepartment;
+        }
+
+        public static Department GetADepartment(string code)
+        {
+            return AllDepartment.FirstOrDefault(x => x.Code == code);
+        }
+
+        public static Department Update_Department(string code, Department department)
+        {
+            Department result = new Department();
+            foreach (var aDepartment in AllDepartment)
+            {
+                if (code == aDepartment.Code)
+                {
+                    aDepartment.Name = department.Name;
+                    result = aDepartment;
+                }
+            }
+
+            return result;
+        }
+
+        public static Department DeleteDepartment(string code)
+        {
+            var department = AllDepartment.FirstOrDefault(x => x.Code == code);
+            if (department != null)
+            {
+                AllDepartment = AllDepartment.Where(x => x.Code != department.Code).ToList();
+            }
+            return department;
         }
     }
 }
